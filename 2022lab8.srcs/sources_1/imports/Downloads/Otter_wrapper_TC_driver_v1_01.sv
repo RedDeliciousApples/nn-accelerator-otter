@@ -39,7 +39,8 @@ module OTTER_Wrapper(
                  
    //- OUTPUT PORT IDS --------------------------------------------------------
    localparam LEDS_PORT_ADDR     = 32'h1100C000;  // 0x1100_C000
-   localparam SEGS_PORT_ADDR     = 32'h1100C004;  // 0x1100_C004
+   //temp changed
+   localparam SEGS_PORT_ADDR     = 32'h1100C00C;  // 0x1100_C004
    localparam ANODES_PORT_ADDR   = 32'h1100C008;  // 0x1100_C008
    
    //- timer-counter output support
