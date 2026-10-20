@@ -1,156 +1,91 @@
-import os
+from pathlib import Path
+
 import torch
-import copy
 from torch import nn
-from torchao.quantization import Int8WeightOnlyConfig, quantize_
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
+from torchvision import datasets
 from torchvision.transforms import v2
-from settings import BATCH_SIZE, device, SEED, EPOCHS, LEARNING_RATE
-from models import *
+
+from models import HiddenLayer, NoHiddenLayers
+from settings import BATCH_SIZE, EPOCHS, LEARNING_RATE, SEED, device
+from test_model import make_test_dataloader, test
 
 
-def train(dataloader, model, loss_fn, optimizer):
-    model.train()
+HERE = Path(__file__).resolve().parent
+ARTIFACTS_DIR = HERE / "artifacts"
+MODEL_PATH = ARTIFACTS_DIR / "model_hidden.pth"
 
-    total_loss = 0
-
-    for X, y in dataloader:
-
-        X = X.to(device)
-        y = y.to(device)
-
-        optimizer.zero_grad()
-
-        pred = model(X)
-
-        loss = loss_fn(pred, y)
-
-        loss.backward()
-        optimizer.step()
-
-        total_loss += loss.item()
-
-    average_loss = total_loss / len(dataloader)
-
-    return average_loss
+transform = v2.Compose([
+    v2.ToImage(),
+    v2.ToDtype(torch.float32, scale=True),
+])
 
 
-
-training_data = datasets.MNIST(
-    root="data",
-    train=True,
-    download=True,
-    transform=v2.Compose([
-        v2.ToImage(),
-        v2.ToDtype(torch.float32, scale=True)
-    ])
-)
-
-test_data = datasets.MNIST(
-    root="data",
-    train=False,
-    download=True,
-    transform=v2.Compose([
-        v2.ToImage(),
-        v2.ToDtype(torch.float32, scale=True)
-    ])
-)
-
-def make_dataloader():
-    generator = torch.Generator()
-    generator.manual_seed(SEED)
-
+def make_train_dataloader():
+    training_data = datasets.MNIST(
+        root=HERE / "data",
+        train=True,
+        download=True,
+        transform=transform,
+    )
+    generator = torch.Generator().manual_seed(SEED)
     return DataLoader(
         training_data,
         batch_size=BATCH_SIZE,
         shuffle=True,
-        generator=generator
+        generator=generator,
     )
 
-dataloader1 = make_dataloader()
-dataloader2 = make_dataloader()
 
-
-device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
-print("using device:" + device)
-
-
-
-torch.manual_seed(SEED)
-model_no_hidden = NoHiddenLayers().to(device)
-
-torch.manual_seed(SEED)
-model_hidden = HiddenLayer().to(device)
-
-loss_fn = nn.CrossEntropyLoss()
-
-optimizer = torch.optim.SGD(
-    model_no_hidden.parameters(),
-    lr=LEARNING_RATE
-)
-
-optimizer2 = torch.optim.SGD(
-    model_hidden.parameters(),
-    lr=LEARNING_RATE
-)
-
-
-def train(dataloader, model, loss_fn, optimizer):
+def train_epoch(dataloader, model, loss_fn, optimizer):
     model.train()
+    total_loss = 0.0
 
-    total_loss = 0
-
-    for X, y in dataloader:
-
-        X = X.to(device)
-        y = y.to(device)
-
+    for images, labels in dataloader:
+        images = images.to(device)
+        labels = labels.to(device)
         optimizer.zero_grad()
-
-        pred = model(X)
-
-        loss = loss_fn(pred, y)
-
+        loss = loss_fn(model(images), labels)
         loss.backward()
         optimizer.step()
-
         total_loss += loss.item()
 
-    average_loss = total_loss / len(dataloader)
-
-    return average_loss
+    return total_loss / len(dataloader)
 
 
-print("\nTraining model with no hidden layer: 784 -> 10\n")
+def train_model(name, model, dataloader):
+    loss_fn = nn.CrossEntropyLoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE)
+
+    print(f"\nTraining {name}")
+    for epoch in range(EPOCHS):
+        loss = train_epoch(dataloader, model, loss_fn, optimizer)
+        print(f"Epoch {epoch + 1}/{EPOCHS} - Loss: {loss:.4f}")
 
 
-for epoch in range(EPOCHS):
-    loss = train(dataloader1, model_no_hidden, loss_fn, optimizer)
-    print(f"Epoch {epoch + 1} / {EPOCHS}"
-          f"\tLoss: {loss:.4f}"
-    )
+def main():
+    print("Using:", device)
+    ARTIFACTS_DIR.mkdir(exist_ok=True)
 
-print("\nTraining model with hidden layer: 784 -> 32 -> 10\n")
+    torch.manual_seed(SEED)
+    model_no_hidden = NoHiddenLayers().to(device)
+    torch.manual_seed(SEED)
+    model_hidden = HiddenLayer().to(device)
 
-for epoch in range(EPOCHS):
-    loss = train(dataloader2, model_hidden, loss_fn, optimizer2)
-    print(f"Epoch {epoch + 1} / {EPOCHS}"
-          f"\tLoss: {loss:.4f}"
-    )
+    train_model("784 -> 10", model_no_hidden, make_train_dataloader())
+    train_model("784 -> 32 -> 10", model_hidden, make_train_dataloader())
+
+    test_dataloader = make_test_dataloader()
+    accuracy_no_hidden = test(test_dataloader, model_no_hidden)
+    accuracy_hidden = test(test_dataloader, model_hidden)
+
+    print("\nFinal results")
+    print(f"784 -> 10 accuracy: {accuracy_no_hidden * 100:.2f}%")
+    print(f"784 -> 32 -> 10 accuracy: {accuracy_hidden * 100:.2f}%")
+
+    torch.save(model_hidden.state_dict(), MODEL_PATH)
+    print("Saved:", MODEL_PATH)
 
 
-print("\n-------------------------------")
-print("DONE TRAINING")
-print("-------------------------------")
-
-
-
-
-
-# torch.save(
-#     model_hidden.state_dict(),
-#     "model_hidden.pth"
-# )
-
-# print("Saved model_hidden.pth")
+if __name__ == "__main__":
+    main()

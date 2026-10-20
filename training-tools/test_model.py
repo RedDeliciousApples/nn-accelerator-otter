@@ -1,86 +1,70 @@
-import os
+from pathlib import Path
+
 import torch
-import copy
-from torch import nn
-from torchao.quantization import Int8WeightOnlyConfig, quantize_
 from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
+from torchao.quantization import Int8WeightOnlyConfig, quantize_
+from torchvision import datasets
 from torchvision.transforms import v2
+
 from models import HiddenLayer
-from settings import BATCH_SIZE,  device
-
-print("Using:", device)
+from settings import BATCH_SIZE, device
 
 
-model = HiddenLayer().to(device)
+HERE = Path(__file__).resolve().parent
+ARTIFACTS_DIR = HERE / "artifacts"
+QUANTIZED_MODEL_PATH = ARTIFACTS_DIR / "model_hidden_int8_torchao.pth"
 
-quantize_(
-    model,
-    Int8WeightOnlyConfig()
-)
-
-checkpoint = torch.load(
-    "model_hidden_int4_torchao.pth",
-    map_location=device,
-    weights_only=True
-)
-
-model.load_state_dict(
-    checkpoint["model_state_dict"]
-)
-
-model.eval()
+transform = v2.Compose([
+    v2.ToImage(),
+    v2.ToDtype(torch.float32, scale=True),
+])
 
 
-test_data = datasets.MNIST(
-    root="data",
-    train=False,
-    download=True,
-    transform=v2.Compose([
-        v2.ToImage(),
-        v2.ToDtype(torch.float32, scale=True)
-    ])
-)
-
-test_dataloader = DataLoader(
-    test_data,
-    batch_size = BATCH_SIZE,
-    shuffle = False
-)
+def make_test_dataloader():
+    test_data = datasets.MNIST(
+        root=HERE / "data",
+        train=False,
+        download=True,
+        transform=transform,
+    )
+    return DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=False)
 
 
-
-def test(dataloader,model):
-
+def test(dataloader, model):
     model.eval()
-
     correct = 0
     total = 0
 
-    #no need for gradients when testing
     with torch.no_grad():
-        for X, y in dataloader:
+        for images, labels in dataloader:
+            images = images.to(device)
+            labels = labels.to(device)
+            predictions = model(images).argmax(dim=1)
+            correct += (predictions == labels).sum().item()
+            total += labels.size(0)
 
-            X = X.to(device)
-            y = y.to(device)
-
-            pred = model(X)
-
-           
-            predicted_digits = pred.argmax(dim=1)
+    return correct / total
 
 
-            correct += (predicted_digits == y).sum().item()
+def load_quantized_model():
+    model = HiddenLayer().to(device)
+    quantize_(model, Int8WeightOnlyConfig())
+    checkpoint = torch.load(
+        QUANTIZED_MODEL_PATH,
+        map_location=device,
+        weights_only=True,
+    )
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.eval()
+    return model
 
-            total += y.size(0)
 
-    accuracy = correct / total
+def main():
+    print("Using:", device)
+    model = load_quantized_model()
+    accuracy = test(make_test_dataloader(), model)
+    print(f"INT8 accuracy: {accuracy * 100:.2f}%")
 
-    return accuracy
 
-accuracy = test(test_dataloader, model)
-
-print(
-    f"Quantized accuracy: "
-    f"{accuracy * 100:.2f}%"
-)
+if __name__ == "__main__":
+    main()

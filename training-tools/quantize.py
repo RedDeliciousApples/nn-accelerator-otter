@@ -1,32 +1,52 @@
+from pathlib import Path
+
 import torch
-from torch import nn
-from torchao.quantization import quantize_, Int4WeightOnlyConfig
+from torchao.quantization import Int8WeightOnlyConfig, quantize_
+
 from models import HiddenLayer
 from settings import device
+from test_model import make_test_dataloader, test
 
-print("Using:", device)
+
+HERE = Path(__file__).resolve().parent
+ARTIFACTS_DIR = HERE / "artifacts"
+FLOAT_MODEL_PATH = ARTIFACTS_DIR / "model_hidden.pth"
+QUANTIZED_MODEL_PATH = ARTIFACTS_DIR / "model_hidden_int8_torchao.pth"
 
 
-model = HiddenLayer().to(device)
+def main():
+    print("Using:", device)
+    ARTIFACTS_DIR.mkdir(exist_ok=True)
 
-weights = torch.load(
-    "model_hidden.pth",
-    map_location=device,
-    weights_only=True
-)
+    model = HiddenLayer().to(device)
+    weights = torch.load(
+        FLOAT_MODEL_PATH,
+        map_location=device,
+        weights_only=True,
+    )
+    model.load_state_dict(weights)
+    model.eval()
 
-model.load_state_dict(weights)
-model.eval()
+    test_dataloader = make_test_dataloader()
+    float_accuracy = test(test_dataloader, model)
 
-quantize_(model, Int4WeightOnlyConfig())
+    quantize_(model, Int8WeightOnlyConfig())
+    int8_accuracy = test(test_dataloader, model)
 
-torch.save(
-    {
-        "model_state_dict": model.state_dict(),
-        "model_type": "784-32-10",
-        "quantization": "Int4WeightOnlyConfig"
-    },
-    "model_hidden_int4_torchao.pth"
-)
+    torch.save(
+        {
+            "model_state_dict": model.state_dict(),
+            "model_type": "784-32-10",
+            "quantization": "Int8WeightOnlyConfig",
+            "test_accuracy": int8_accuracy,
+        },
+        QUANTIZED_MODEL_PATH,
+    )
 
-print("Saved quantized model")
+    print(f"Float accuracy: {float_accuracy * 100:.2f}%")
+    print(f"INT8 accuracy: {int8_accuracy * 100:.2f}%")
+    print("Saved:", QUANTIZED_MODEL_PATH)
+
+
+if __name__ == "__main__":
+    main()
