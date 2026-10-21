@@ -143,11 +143,24 @@ selected = select_images(labels)
 
 for digit, index in enumerate(selected):
     assert labels[index].item() == digit
-    print(f"Digit {digit}: test image index {index}")
+    print(f"Image {digit}: test image index {index}")
+
+# Convert a byte array to a string of hex values, 16 per line: four spaces, .byte, then the numbers joined with ", ".
+def bytes_to_text(byte_array):
+    # flatten the array and convert to a list of integers
+    byte_array = byte_array.flatten().tolist()
+    lines = []
+    for i in range(0, len(byte_array), 16):
+        line = "    .byte " + ", ".join(f"{b}" for b in byte_array[i:i+16])
+        lines.append(line)
+    return "\n".join(lines)
 
 if (__name__ == "__main__"):
-    selected += [index for _, index in select_edge_cases(images_int8, selected)]
-    results = [run_once(i) for i in range(len(selected))]
-    correct = sum(r["prediction"] == r["label"] for r in results)
-    print(f"{correct}/{len(results)} predictions match their labels")
-    find_float_integer_disagreements(images_int8, labels)
+    # selected += [index for _, index in select_edge_cases(images_int8, selected)]
+    # results = [run_once(i) for i in range(len(selected))]
+    # correct = sum(r["prediction"] == r["label"] for r in results)
+    # print(f"{correct}/{len(results)} predictions match their labels")
+    # find_float_integer_disagreements(images_int8, labels)
+    print("checking that bytes to text conversion works...")
+    array = bytes_to_text(my_dict["hidden_weights"].numpy())
+    print("Created array with line count:",  len(array.split("\n")), "and first 3 lines:\n", "\n".join(array.split("\n")[:3]))
