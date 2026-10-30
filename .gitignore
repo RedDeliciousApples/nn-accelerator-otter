@@ -1,0 +1,30 @@
+# Xilinx Vivado generated state and build products
+.Xil/
+*.cache/
+*.runs/
+*.sim/
+*.hw/
+*.ip_user_files/
+
+# Generated implementation and synthesis artifacts
+*.dcp
+*.bit
+*.bin
+*.ltx
+*.jou
+*.log
+*.str
+*.wdb
+*.wcfg
+*.backup.jou
+*.backup.log
+
+# Downloaded Python datasets and caches
+training-tools/data/
+training-tools/__pycache__/
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+*.swp
+*~
