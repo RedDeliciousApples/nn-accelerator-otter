@@ -1,6 +1,6 @@
 """
 usage: python training-tools/show_test_images.py [start] [count] [-o out.png] [--cols N]
-Defaults to images 0-59, and output goes to artifacts/images/mnist_test_<start>-<end>.png.
+Defaults to images 0-59, and output goes to artifacts/images/mnist_test_<start>-<end>.png
 """
 import argparse
 from pathlib import Path
