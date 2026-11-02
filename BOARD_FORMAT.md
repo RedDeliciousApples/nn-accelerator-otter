@@ -18,7 +18,7 @@ Network: 784 -> 32 (ReLU) -> 10. All multi-byte values are little-endian, every 
 | `SCORES` | `0xA800` | 40 B | int32 `[10]`, written by the accelerator |
 | Stack | down from `0xFFFC` | | `0xA900` and up is free |
 
-Gaps between regions (e.g. `0xA3EC`-`0xA3FF`) are padding and must be ignored.
+Gaps between regions (e.g. `0xA3EC`-`0xA3FF`) are padding and should be ignored.
 
 Reference implementation: `training-tools/integer_network.py`.
 
@@ -31,3 +31,17 @@ python training-tools/export_firmware_data.py [digit 0-9]
 Writes to `training-tools/artifacts/firmware/`:
 - `network_data.s`: `.data` section (link at `0x4000`) with labels
 - `otter_data.mem`: full 64 KB image as 16384 32-bit hex words, to merge with the program (since code area is 0).
+
+## Software baseline (RV32I, `firmware/main.c`)
+
+
+Simulated results (testbench `clk` 50 MHz, so `s_clk` 25 MHz, no hardware multiply):
+
+| Image (`export_firmware_data.py <digit>`) | Predicted | Expected scores (reference) match? | `s_clk` cycles | PC updates | Sim time |
+|---|---|---|---|---|---|
+| test image 18, label 3 | 3 | yes, all 10 scores identical | 1,287,201 | 618,161 | 51.49 ms |
+| test image 0, label 7 | 7 | yes, all 10 scores identical | 1,099,629 | 524,375 | 43.99 ms |
+
+CPI is about 2.1. The per-image difference comes from the data-dependent length of `__mulsi3`.
+Digit 3 scores: `[-4213, -2234, 3548, 6229, -3803, 475, 1528, -3289, 1876, -1850]`.
+Digit 7 scores: `[803, -7638, 2991, 6084, -4793, -433, -10638, 13809, 273, 3817]`.

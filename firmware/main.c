@@ -14,6 +14,16 @@
 #define IMAGE ((const int8_t *)0xA400)       // [784]
 #define SCORES ((volatile int32_t *)0xA800)  // [10]
 
+// Basys3 output ports (see Exp6_OTTER_Wrapper)
+#define LEDS   (*(volatile uint32_t *)0x1100C000)
+#define SEGS   (*(volatile uint32_t *)0x1100C004)
+#define ANODES (*(volatile uint32_t *)0x1100C008)
+
+// 7-segment patterns for 0-9: bit7 = a ... bit1 = g, bit0 = dp, active low
+static const uint8_t SEG_DIGIT[10] = {
+    0x03, 0x9F, 0x25, 0x0D, 0x99, 0x49, 0x41, 0x1F, 0x01, 0x09
+};
+
 int main(void) {
     int32_t hidden[HIDDEN_SIZE];
     int32_t shift = HIDDEN_SHIFT;
@@ -34,6 +44,14 @@ int main(void) {
             sum += row[j] * hidden[j];
         SCORES[k] = sum;
     }
+
+    int32_t best = 0;  // argmax over the scores
+    for (int k = 1; k < OUT_SIZE; k++)
+        if (SCORES[k] > SCORES[best]) best = k;
+
+    LEDS = 1u << best;             // one-hot LED, plus the digit on the rightmost 7-seg
+    SEGS = SEG_DIGIT[best];
+    ANODES = 0xE;                  // active low: enable only the rightmost digit
 
     for (;;) {}  // done; scores are at 0xA800
 }
