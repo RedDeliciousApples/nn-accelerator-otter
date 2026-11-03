@@ -251,9 +251,9 @@ def verify_memory_image(memory, image_int8):
     return from_memory
 
 
-def export_all(position=0, out_dir=HERE / "artifacts" / "firmware"):
-    # write network_data.s and otter_data.mem for the selected digit image, after a round-trip check
-    index = selected[position]
+def export_all(position=0, out_dir=HERE / "artifacts" / "firmware", index=None):
+    if index is None:
+        index = selected[position]
     image = images_int8[index].numpy()
     memory = build_memory_image(my_dict, image)
     result = verify_memory_image(memory, image)
@@ -271,6 +271,10 @@ if (__name__ == "__main__"):
     # correct = sum(r["prediction"] == r["label"] for r in results)
     # print(f"{correct}/{len(results)} predictions match their labels")
     # find_float_integer_disagreements(images_int8, labels)
-    import sys
-    # usage: python export_firmware_data.py [digit 0-9]
-    export_all(int(sys.argv[1]) if len(sys.argv) > 1 else 0)
+    import argparse
+    parser = argparse.ArgumentParser(description="Export the network and one test image for the OTTER.")
+    parser.add_argument("digit", nargs="?", type=int, default=0, help="first test image of this digit 0-9 (default 0)")
+    parser.add_argument("--index", type=int, help="use this MNIST test image index instead (see show_test_images.py)")
+    args = parser.parse_args()
+    assert args.index is None or 0 <= args.index < len(images_int8), "index out of range"
+    export_all(args.digit, index=args.index)
