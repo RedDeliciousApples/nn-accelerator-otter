@@ -34,14 +34,25 @@ Writes to `training-tools/artifacts/firmware/`:
 
 ## Software baseline (RV32I, `firmware/main.c`)
 
-
 Simulated results (testbench `clk` 50 MHz, so `s_clk` 25 MHz, no hardware multiply):
 
 | Image (`export_firmware_data.py <digit>`) | Predicted | Expected scores (reference) match? | `s_clk` cycles | PC updates | Sim time |
 |---|---|---|---|---|---|
-| test image 18, label 3 | 3 | yes, all 10 scores identical | 1,287,201 | 618,161 | 51.49 ms |
-| test image 0, label 7 | 7 | yes, all 10 scores identical | 1,099,629 | 524,375 | 43.99 ms |
+| test image 3, label 0 | 0 | yes, all 10 scores identical | 1,276,463 | 612,792 | 51.05852 ms |
+| test image 2, label 1 (fastest tested) | 1 | yes, all 10 scores identical | 994,407 | 471,764 | 39.77628 ms |
+| test image 1, label 2 | 2 | yes, all 10 scores identical | 1,201,787 | 575,454 | 48.07148 ms |
+| test image 18, label 3 (slowest tested) | 3 | yes, all 10 scores identical | 1,287,203 | 618,162 | 51.48812 ms |
+| test image 4, label 4 | 4 | yes, all 10 scores identical | 1,104,815 | 526,968 | 44.19260 ms |
+| test image 8, label 5 (misclassified) | 6 | yes, all 10 scores identical | 1,221,067 | 585,094 | 48.84268 ms |
+| test image 15, label 5 (retry) | 5 | yes, all 10 scores identical | 1,144,171 | 546,646 | 45.76684 ms |
+| test image 11, label 6 | 6 | yes, all 10 scores identical | 1,207,359 | 578,240 | 48.29436 ms |
+| test image 0, label 7 | 7 | yes, all 10 scores identical | 1,099,631 | 524,376 | 43.98524 ms |
+| test image 61, label 8 | 8 | yes, all 10 scores identical | 1,241,747 | 595,434 | 49.66988 ms |
+| test image 7, label 9 | 9 | yes, all 10 scores identical | 1,123,051 | 536,086 | 44.92204 ms |
 
-CPI is about 2.1. The per-image difference comes from the data-dependent length of `__mulsi3`.
+
+All 11 simulations matched all ten reference scores. The first digit 5 image was also misclassified as 6 by the Python reference; the next digit-5 image passed. Initial accuracy was 9/10 before the retry. Digit 3 took about 29.44% longer than digit 1 among these tested images.
+
+The per-image timing difference comes from the data-dependent length of `__mulsi3`.
 Digit 3 scores: `[-4213, -2234, 3548, 6229, -3803, 475, 1528, -3289, 1876, -1850]`.
 Digit 7 scores: `[803, -7638, 2991, 6084, -4793, -433, -10638, 13809, 273, 3817]`.
