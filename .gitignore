@@ -18,6 +18,7 @@
 *.wcfg
 *.backup.jou
 *.backup.log
+*.idea
 
 # Downloaded Python datasets and caches
 training-tools/data/
