@@ -4,7 +4,7 @@
 <!-- Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.                   -->
 <!-- Copyright 2022-2026 Advanced Micro Devices, Inc. All Rights Reserved.   -->
 
-<Project Product="Vivado" Version="7" Minor="72" Path="C:/Users/christian/Downloads/Projects/nn-accel-otter-main/2022lab8.xpr">
+<Project Product="Vivado" Version="7" Minor="72" Path="C:/Users/kaith/nn-accelerator-otter/2022lab8.xpr">
   <DefaultLaunch Dir="$PRUNDIR"/>
   <Configuration>
     <Option Name="Id" Val="85a1377187d54ac1bdb859c38f81c0e7"/>
@@ -43,8 +43,7 @@
     <Option Name="SimulatorGccVersionVCS" Val="9.2.0"/>
     <Option Name="SimulatorGccVersionRiviera" Val="9.3.0"/>
     <Option Name="SimulatorGccVersionActiveHdl" Val="9.3.0"/>
-    <Option Name="BoardPart" Val="digilentinc.com:basys3:part0:1.2"/>
-    <Option Name="BoardPartRepoPaths" Val="$PPRDIR/../../../AppData/Roaming/Xilinx/Vivado/2022.2/xhub/board_store/xilinx_board_store"/>
+    <Option Name="BoardPart" Val=""/>
     <Option Name="ActiveSimSet" Val="sim_1"/>
     <Option Name="DefaultLib" Val="xil_defaultlib"/>
     <Option Name="ProjectType" Val="Default"/>
@@ -193,7 +192,6 @@
       <File Path="$PSRCDIR/sources_1/imports/Downloads/clk_2n_div_test_v1_01.v">
         <FileInfo>
           <Attr Name="UserDisabled" Val="1"/>
-          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="ImportPath" Val="$PPRDIR/../Downloads/clk_2n_div_test_v1_01.v"/>
           <Attr Name="ImportTime" Val="1771108764"/>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -204,7 +202,6 @@
       <File Path="$PSRCDIR/sources_1/imports/Downloads/univ_sseg_v1_05.v">
         <FileInfo>
           <Attr Name="UserDisabled" Val="1"/>
-          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="ImportPath" Val="$PPRDIR/../Downloads/univ_sseg_v1_05.v"/>
           <Attr Name="ImportTime" Val="1771108758"/>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -215,7 +212,6 @@
       <File Path="$PSRCDIR/sources_1/imports/Downloads/mux_2t1_nb_v1_04.v">
         <FileInfo>
           <Attr Name="UserDisabled" Val="1"/>
-          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="ImportPath" Val="$PPRDIR/../Downloads/mux_2t1_nb_v1_04.v"/>
           <Attr Name="ImportTime" Val="1770327793"/>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -226,7 +222,6 @@
       <File Path="$PSRCDIR/sources_1/imports/Downloads/usr_nb_v1_03.v">
         <FileInfo>
           <Attr Name="UserDisabled" Val="1"/>
-          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="ImportPath" Val="$PPRDIR/../Downloads/usr_nb_v1_03.v"/>
           <Attr Name="ImportTime" Val="1768242602"/>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -237,7 +232,6 @@
       <File Path="$PSRCDIR/sources_1/imports/Downloads/timer_counter_v1_03.sv">
         <FileInfo>
           <Attr Name="UserDisabled" Val="1"/>
-          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
@@ -268,6 +262,14 @@
         </FileInfo>
       </File>
       <File Path="$PSRCDIR/sources_1/new/mac4.sv">
+        <FileInfo>
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/new/dot_doer.sv">
         <FileInfo>
           <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -407,9 +409,7 @@
       <RQSFiles/>
     </Run>
   </Runs>
-  <Board>
-    <Jumpers/>
-  </Board>
+  <Board/>
   <DashboardSummary Version="1" Minor="0">
     <Dashboards>
       <Dashboard Name="default_dashboard">
