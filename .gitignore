@@ -23,6 +23,7 @@
 # Downloaded Python datasets and caches
 training-tools/data/
 training-tools/__pycache__/
+training-tools/artifacts/firmware/
 
 # Editor and operating-system files
 .DS_Store
