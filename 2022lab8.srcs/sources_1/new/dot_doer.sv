@@ -29,7 +29,7 @@
 module dot_doer(
     input logic layer_sel,
     input logic signed [17:0] mac4_result,
-    input logic shift_amt,
+    input logic [4:0] shift_amt,
     input clk,
     input rst,
     input start_row,
@@ -37,7 +37,7 @@ module dot_doer(
     input logic signed [31:0] bias,
     
     output logic neuron_value_ready,
-    output logic signed [7:0] neuron_value
+    output logic signed [31:0] neuron_value
 );
     
     logic signed [31:0] acc;
