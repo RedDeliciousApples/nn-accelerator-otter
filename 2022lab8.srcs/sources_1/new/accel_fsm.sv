@@ -129,21 +129,54 @@ module accel_fsm(
                 clr_group = 1'b1;
                 NS = S_W_ADDR;
             end
-
+            //ask for weight from memory
             S_W_ADDR: begin
                 busy = 1'b1;
                 mem_rden = 1'b1;
                 addr_sel = ADDR_WEIGHT;
                 NS = S_X_ADDR;
             end
-
+            //1 cc later, it's here, so put it in the weight register
             S_X_ADDR: begin
+                busy = 1'b1;
+                w_ld = 1'b1;
+
+                if (!layer2)begin
+                    mem_rden = 1'b1;
+                    addr_sel = ADDR_IMAGE;
+                end
+
+                NS = S_ADD;
             end
 
             S_ADD: begin
+                busy = 1'b1;
+                add_en = 1'b1;
+                inc_group = 1'b1;
+
+                if (last_group) begin
+                    NS = S_STORE;
+                end
+                else begin
+                    NS = S_W_ADDR;
+                end
+                
             end
 
             S_STORE: begin
+                busy = 1'b1;
+                inc_row = 1'b1;
+                
+                if (!layer2) begin
+                    hidden_we = 1'b1;
+                end
+                else begin
+                    hidden_we = 1'b0;
+                    mem_we = 1'b1;
+                    addr_sel = ADDR_SCORE;
+                end
+
+                NS = S_NEXT;
             end
 
             S_NEXT: begin
