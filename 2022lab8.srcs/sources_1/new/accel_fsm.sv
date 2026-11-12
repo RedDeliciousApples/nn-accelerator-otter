@@ -96,24 +96,45 @@ module accel_fsm(
         unique case (PS)
 
             S_IDLE: begin
+                clr_group = 1'b1;
+                clr_row = 1'b1;
                 if (start) begin
-                    S_SHIFT_ADDR <= NS;
+                    NS = S_SHIFT_ADDR;
                 end
             end
 
             S_SHIFT_ADDR: begin
+                busy = 1'b1;
+                mem_rden = 1'b1;
+                addr_sel = ADDR_SHIFT;
+                NS = S_SHIFT_CAP;
             end
 
             S_SHIFT_CAP: begin
+                busy = 1'b1;
+                shift_ld = 1'b1;
+                NS = S_BIAS_ADDR;
             end
 
             S_BIAS_ADDR: begin
+                busy = 1'b1;
+                mem_rden = 1'b1;
+                addr_sel = ADDR_BIAS;
+                NS = S_ROW_START;
             end
 
             S_ROW_START: begin
+                busy = 1'b1;
+                start_row = 1'b1;
+                clr_group = 1'b1;
+                NS = S_W_ADDR;
             end
 
             S_W_ADDR: begin
+                busy = 1'b1;
+                mem_rden = 1'b1;
+                addr_sel = ADDR_WEIGHT;
+                NS = S_X_ADDR;
             end
 
             S_X_ADDR: begin
