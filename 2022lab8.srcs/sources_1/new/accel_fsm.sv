@@ -180,9 +180,22 @@ module accel_fsm(
             end
 
             S_NEXT: begin
+                busy = 1'b1;
+                if (last_row) begin
+                     if (!layer2) begin
+                         set_layer2 = 1'b1;
+                          clr_row = 1'b1;
+                           NS = S_BIAS_ADDR;
+                     end
+                    else NS = S_DONE;
+                end
+                else NS = S_BIAS_ADDR;
             end
 
             S_DONE: begin
+                busy = 1'b1;
+                done = 1'b1;
+                NS = S_IDLE;
             end
 
             default: NS = S_IDLE;
