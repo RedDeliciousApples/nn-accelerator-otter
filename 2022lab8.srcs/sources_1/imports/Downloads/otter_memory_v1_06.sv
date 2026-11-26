@@ -54,16 +54,24 @@
     input [31:0] MEM_DIN2,  // Data to save
     input [1:0] MEM_SIZE,   // 0-Byte, 1-Half, 2-Word
     input MEM_SIGN,         // 1-unsigned 0-signed
-    input [31:0] IO_IN,     // Data from IO     
+    input [31:0] IO_IN,     // Data from IO
+    input        ACC_BUSY,  // accelerator is using data port
+    input [31:0] ACC_ADDR,  // accelerator data address
+    input        ACC_RDEN,  // accelerator read enable
+    input        ACC_WE,    // accelerator write enable
+    input [31:0] ACC_DIN,   // accelerator write data
     //output ERR,
     output logic IO_WR,     // IO 1-write 0-read
     output logic [31:0] MEM_DOUT1,  // Instruction
-    output logic [31:0] MEM_DOUT2); // Data
+    output logic [31:0] MEM_DOUT2,  // Data
+    output logic [31:0] ACC_DOUT);  // Accelerator read data
     
     logic [13:0] wordAddr1, wordAddr2;
     logic [31:0] memReadWord, ioBuffer, memReadSized;
     logic [1:0] byteOffset;
     logic weAddrValid;      // active when saving (WE) to valid memory address
+    logic [1:0] eff_size;   // access size/sign, forced to word while ACC_BUSY
+    logic eff_sign;
        
     (* rom_style="{distributed | block}" *)
     (* ram_decomp = "power" *) logic [31:0] memory [0:16383];
@@ -72,8 +80,13 @@
         $readmemh("otter_memory.mem", memory, 0, 16383);
     end
     
-    assign wordAddr2 = MEM_ADDR2[15:2];
-    assign byteOffset = MEM_ADDR2[1:0];     // byte offset of memory address
+    //  while ACC_BUSY the accelerator has the data port
+    //  MMIO decode and IO buffers stay on the CPU's signals
+    assign wordAddr2 = ACC_BUSY ? ACC_ADDR[15:2] : MEM_ADDR2[15:2];
+    assign byteOffset = ACC_BUSY ? ACC_ADDR[1:0] : MEM_ADDR2[1:0];  // byte offset of memory address
+    assign eff_size = ACC_BUSY ? 2'b10 : MEM_SIZE;
+    assign eff_sign = ACC_BUSY ? 1'b0  : MEM_SIGN;
+    assign ACC_DOUT = memReadWord;
          
     // NOT USED IN OTTER
     //Check for misalligned or out of bounds memory accesses 
@@ -89,8 +102,12 @@
     // BRAM requires all reads and writes to occur synchronously
     always_ff @(posedge MEM_CLK) begin
     
-      // save data (WD) to memory (ADDR2)
-      if (weAddrValid == 1) begin  //(MEM_WE == 1) && (MEM_ADDR2 < 16'hFFFD)) begin   // write enable and valid address space
+      // save data (WD) to memory (ADDR2), or a word from the accelerator while busy
+      if (ACC_BUSY == 1) begin
+        if (ACC_WE)
+            memory[wordAddr2] <= ACC_DIN;                          // accelerator word write
+      end
+      else if (weAddrValid == 1) begin  //(MEM_WE == 1) && (MEM_ADDR2 < 16'hFFFD)) begin   // write enable and valid address space
         case({MEM_SIZE,byteOffset})
             4'b0000: memory[wordAddr2][7:0]   <= MEM_DIN2[7:0];     // sb at byte offsets
             4'b0001: memory[wordAddr2][15:8]  <= MEM_DIN2[7:0];
@@ -110,13 +127,13 @@
         if(MEM_RDEN1)                       // need EN for extra load cycle to not change instruction
             MEM_DOUT1 <= memory[MEM_ADDR1];
 
-        if(MEM_RDEN2)                         // Read word from memory
+        if(ACC_BUSY ? ACC_RDEN : MEM_RDEN2)   // Read word from memory (accelerator while busy)
             memReadWord <= memory[wordAddr2];
     end
        
     // Change the data word into sized bytes and sign extend 
     always_comb begin
-        case({MEM_SIGN,MEM_SIZE,byteOffset})
+        case({eff_sign,eff_size,byteOffset})
             5'b00011: memReadSized = {{24{memReadWord[31]}},memReadWord[31:24]};    // signed byte
             5'b00010: memReadSized = {{24{memReadWord[23]}},memReadWord[23:16]};
             5'b00001: memReadSized = {{24{memReadWord[15]}},memReadWord[15:8]};

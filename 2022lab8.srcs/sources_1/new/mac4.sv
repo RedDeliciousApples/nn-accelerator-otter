@@ -1,16 +1,16 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineers: Christian Saliba, Kai Hoag
+// Company: Cal Poly
+// Engineer: Christian Saliba and Kai Hoag
 // 
 // Create Date: 11/03/2026 11:11:17 AM
 // Design Name: 
 // Module Name: mac4
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
+// Project Name: nn-accel-otter
+// Target Devices: Basys3 - Artix-7 XC7A35T-1CPG236C
+// Tool Versions: Vivado 2026.2
 // Description: 
-// 
+// Four signed int8 x int8 multipliers and an adder tree over one packed word.
 // Dependencies: 
 // 
 // Revision:

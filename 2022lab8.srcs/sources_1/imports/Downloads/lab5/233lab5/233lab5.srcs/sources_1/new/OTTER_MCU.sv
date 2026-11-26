@@ -60,6 +60,16 @@ module OTTER_MCU (
     logic [31:0] ir;                            // MEMORY DOUT1
     //Branch cond gen
     logic br_eq, br_lt, br_ltu;
+
+    // ACCELERATOR (nn_accel) on memory data port 2
+    logic [31:0] accel_mem_addr;
+    logic [31:0] accel_mem_din;
+    logic        accel_mem_rden;
+    logic        accel_mem_we;
+    logic        accel_busy;
+    logic [31:0] accel_dout;
+    logic [31:0] accel_io_dout;
+    logic [31:0] io_in_selected;
     
     //################
     //CSR
@@ -239,6 +249,33 @@ module OTTER_MCU (
     
  
   //###############
+  // ACCELERATOR MMIO / IO SELECT
+  //###############
+  always_comb begin
+    io_in_selected = iobus_in;
+    if (result == 32'h1101_0004)
+      io_in_selected = accel_io_dout;
+  end
+
+  //###############
+  // INSTANTIATE ACCELERATOR
+  //###############
+  nn_accel my_accel (
+    .clk      (clk),
+    .rst      (RST),
+    .io_addr  (result),
+    .io_wr    (iobus_wr),
+    .io_din   (iobus_out),
+    .io_dout  (accel_io_dout),
+    .mem_dout (accel_dout),
+    .mem_addr (accel_mem_addr),
+    .mem_rden (accel_mem_rden),
+    .mem_we   (accel_mem_we),
+    .mem_din  (accel_mem_din),
+    .busy     (accel_busy)
+  );
+
+  //###############
   // INSTANTIATE MEMORY
   //###############
   Memory OTTER_MEMORY ( 
@@ -251,10 +288,16 @@ module OTTER_MCU (
     .MEM_DIN2  (rs2),            // REG_FILE rs2
     .MEM_SIZE  (ir[13:12]),      // from memory output ir
     .MEM_SIGN  (ir[14]),         // from memory output ir
-    .IO_IN     (iobus_in),       // outside world input (LEDs & buttons)
+    .IO_IN     (io_in_selected), // outside world input (LEDs & buttons)
     .IO_WR     (iobus_wr),       // outside world output 
     .MEM_DOUT1 (ir),             // memory output 32-bit signal 
-    .MEM_DOUT2 (MEMORY_DOUT2)    // memory output into 4x1 REG_FILE MUX (for store instructions??)
+    .MEM_DOUT2 (MEMORY_DOUT2),   // memory output into 4x1 REG_FILE MUX (for store instructions??)
+    .ACC_BUSY  (accel_busy),
+    .ACC_ADDR  (accel_mem_addr),
+    .ACC_RDEN  (accel_mem_rden),
+    .ACC_WE    (accel_mem_we),
+    .ACC_DIN   (accel_mem_din),
+    .ACC_DOUT  (accel_dout)
      ); 
   
 endmodule
