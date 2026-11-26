@@ -1,16 +1,18 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: Cal Poly
+// Engineer: Christian Saliba and Kai Hoag
 // 
 // Create Date: 11/04/2026 11:49:21 AM
 // Design Name: 
 // Module Name: accel_fsm
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
+// Project Name: nn-accel-otter
+// Target Devices: Basys3 - Artix‑7 XC7A35T‑1CPG236C
+// Tool Versions: Vivado 2026.2
 // Description: 
-// 
+// The fsm that handles the accelerator. 
+// It generates the control signals for the datapath and memory interface.
+// It also generates the address select signal for the address generator.
 // Dependencies: 
 // 
 // Revision:
