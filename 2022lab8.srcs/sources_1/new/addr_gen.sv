@@ -1,16 +1,17 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: Cal Poly
+// Engineer: Christian Saliba and Kai Hoag
 // 
 // Create Date: 11/13/2026 11:22:36 AM
 // Design Name: 
 // Module Name: addr_gen
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
+// Project Name: nn-accel-otter
+// Target Devices: Basys3 - Artix-7 XC7A35T-1CPG236C
+// Tool Versions: Vivado 2026.2
 // Description: 
-// 
+// Counts rows and groups and turns them into byte addresses for the shift,
+// bias, weight, image and score regions.
 // Dependencies: 
 // 
 // Revision:

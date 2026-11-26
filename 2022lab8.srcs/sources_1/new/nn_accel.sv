@@ -1,22 +1,23 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: Cal Poly
+// Engineer: Christian Saliba and Kai Hoag
 // 
 // Create Date: 11/03/2026 11:00:17 AM
 // Design Name: 
 // Module Name: nn_accel
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
+// Project Name: nn-accel-otter
+// Target Devices: Basys3 - Artix-7 XC7A35T-1CPG236C
+// Tool Versions: Vivado 2026.2
 // Description: 
-// 
-// Dependencies: 
+// Top level of the accelerator. Wires the MMIO registers, controller FSM,
+// address generator, MAC and hidden registers, and drives memory data port 2.
+// Dependencies: accel_mmio.sv, accel_fsm.sv, addr_gen.sv, mac4.sv, dot_doer.sv, hidden_regs.sv
 // 
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-//                       +--------------------------+
+//                      +--------------------------+
 //        clk --------->|                          |
 //        rst --------->|                          |
 //                      |                          |

@@ -1,17 +1,18 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: Cal Poly
+// Engineer: Christian Saliba and Kai Hoag
 // 
 // Create Date: 11/09/2026 10:22:29 AM
 // Design Name: 
 // Module Name: hidden_regs
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
+// Project Name: nn-accel-otter
+// Target Devices: Basys3 - Artix-7 XC7A35T-1CPG236C
+// Tool Versions: Vivado 2026.2
 // Description: 
-// 
-// Dependencies:  
+// Stores the 32 hidden-layer activations as int8 and reads four out at a time
+// for layer 2.
+// Dependencies: 
 // 
 // Revision:
 // Revision 0.01 - File Created

@@ -7,7 +7,7 @@
 // Design Name: 
 // Module Name: accel_fsm
 // Project Name: nn-accel-otter
-// Target Devices: Basys3 - Artix‑7 XC7A35T‑1CPG236C
+// Target Devices: Basys3 - Artix-7 XC7A35T-1CPG236C
 // Tool Versions: Vivado 2026.2
 // Description: 
 // The fsm that handles the accelerator. 

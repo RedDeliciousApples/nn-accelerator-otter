@@ -1,16 +1,17 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: Cal Poly
+// Engineer: Christian Saliba and Kai Hoag
 // 
 // Create Date: 11/07/2026 03:25:33 PM
 // Design Name: 
 // Module Name: accel_mmio
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
+// Project Name: nn-accel-otter
+// Target Devices: Basys3 - Artix-7 XC7A35T-1CPG236C
+// Tool Versions: Vivado 2026.2
 // Description: 
-// 
+// CTRL/STATUS memory-mapped registers. Store bit 0 in CTRL to start.
+// STATUS returns {done, busy}.
 // Dependencies: 
 // 
 // Revision:

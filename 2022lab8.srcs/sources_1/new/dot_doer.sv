@@ -1,18 +1,19 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: Cal Poly
+// Engineer: Christian Saliba and Kai Hoag
 // 
 // Create Date: 11/04/2026 10:16:38 AM
 // Design Name: 
 // Module Name: dot_doer
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: Computes dot product for specific neurons. 
-//
-// 
-// Dependencies: MAC4 FSM, layer_sel = 1 means 196 accums, 0 means 8 accums
+// Project Name: nn-accel-otter
+// Target Devices: Basys3 - Artix-7 XC7A35T-1CPG236C
+// Tool Versions: Vivado 2026.2
+// Description: 
+// Dot-product unit for one neuron: sums the packed MAC results over a row,
+// adds the bias, and on layer 1 arithmetic-shifts and clamps to [0, 127].
+// layer_sel = 1 selects layer 1 (196 groups), 0 selects layer 2 (8 groups).
+// Dependencies: mac4.sv
 // 
 // Revision:
 // Revision 0.01 - File Created
