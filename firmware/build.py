@@ -1,6 +1,8 @@
-"""Build main.c and merge the program into the data image.
+"""Build a firmware source and merge the program into the data image.
 
-usage: python firmware/build.py
+usage: python firmware/build.py [source.c]
+source.c defaults to main.c (the accelerator firmware); use main_sw.c for the
+software baseline.
 Needs riscv64-unknown-elf-gcc with an rv32i/ilp32 multilib on PATH.
 Reads training-tools/artifacts/firmware/otter_data.mem (from export_firmware_data.py)
 writes firmware/build/program.dis and firmware/build/otter_memory.mem, and copies the
@@ -8,7 +10,10 @@ writes firmware/build/program.dis and firmware/build/otter_memory.mem, and copie
 """
 import shutil
 import subprocess
+import sys
 from pathlib import Path
+
+SOURCE = sys.argv[1] if len(sys.argv) > 1 else "main.c"
 
 HERE = Path(__file__).resolve().parent
 BUILD = HERE / "build"
@@ -25,7 +30,7 @@ def run(*args):
 BUILD.mkdir(exist_ok=True)
 elf, binary = BUILD / "program.elf", BUILD / "program.bin"
 run(PREFIX + "gcc", "-march=rv32i", "-mabi=ilp32", "-O2", "-nostdlib", "-ffreestanding",
-    "-T", HERE / "link.ld", HERE / "start.S", HERE / "main.c", "-lgcc", "-o", elf)
+    "-T", HERE / "link.ld", HERE / "start.S", HERE / SOURCE, "-lgcc", "-o", elf)
 run(PREFIX + "objcopy", "-O", "binary", elf, binary)
 with open(BUILD / "program.dis", "w") as f:
     subprocess.run([PREFIX + "objdump", "-d", elf], check=True, stdout=f)
